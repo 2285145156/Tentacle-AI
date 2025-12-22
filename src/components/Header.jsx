@@ -1,8 +1,22 @@
-import React from 'react';
-import { Search, Zap } from 'lucide-react';
+import React, { useRef } from 'react';
+import { Search, Zap, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
-export function Header() {
+export function Header({ onSearch, isSearching }) {
+    const inputRef = useRef(null);
+
+    const handleSearchClick = () => {
+        if (inputRef.current) {
+            onSearch(inputRef.current.value);
+        }
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            onSearch(e.currentTarget.value);
+        }
+    };
+
     return (
         <header className="h-20 px-6 flex items-center justify-between border-b border-white/5 bg-slate-950/50 backdrop-blur-sm z-50">
             {/* Logo Area */}
@@ -22,12 +36,24 @@ export function Header() {
                     <div className="relative flex items-center bg-slate-900/80 border border-white/10 rounded-full overflow-hidden shadow-2xl">
                         <Search className="ml-4 w-5 h-5 text-slate-400" />
                         <input
+                            ref={inputRef}
                             type="text"
                             defaultValue="How do Black Holes work?"
-                            className="w-full bg-transparent border-none focus:ring-0 text-slate-200 placeholder-slate-500 px-4 py-3 font-medium"
+                            className="w-full bg-transparent border-none focus:ring-0 focus:outline-none appearance-none text-slate-200 placeholder-slate-500 px-4 py-3 font-medium shadow-none outline-none ring-0 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden"
+                            style={{
+                                boxShadow: 'none',
+                                border: 'none',
+                                outline: 'none',
+                                caretColor: '#22d3ee'
+                            }}
+                            onKeyDown={handleKeyDown}
                         />
-                        <button className="px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold transition-all duration-300 hover:shadow-[0_0_20px_rgba(34,211,238,0.5)]">
-                            GO
+                        <button
+                            onClick={handleSearchClick}
+                            disabled={isSearching}
+                            className="px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold transition-all duration-300 hover:shadow-[0_0_20px_rgba(34,211,238,0.5)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                            {isSearching ? <Loader2 className="animate-spin w-4 h-4" /> : "GO"}
                         </button>
                     </div>
                 </div>

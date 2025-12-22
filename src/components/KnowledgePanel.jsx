@@ -1,7 +1,7 @@
 import React from 'react';
 import { Send } from 'lucide-react';
 
-export function KnowledgePanel() {
+export function KnowledgePanel({ answer, isSearching, query }) {
 
 
     return (
@@ -18,12 +18,30 @@ export function KnowledgePanel() {
                 </div>
 
                 <div className="flex-1 p-4 overflow-y-auto space-y-4 text-sm pt-8">
-                    <div className="bg-slate-800/50 p-3 rounded-lg rounded-tl-none border border-white/5 text-slate-300">
-                        How does the event horizon work?
-                    </div>
-                    <div className="bg-cyan-900/10 p-3 rounded-lg border-l-2 border-cyan-500 text-slate-400 font-mono text-xs">
-                        [Brain]: The event horizon is the boundary defining the region of space around a black hole from which nothing (not even light) can escape.
-                    </div>
+                    {isSearching ? (
+                        <div className="flex items-center justify-center h-full">
+                            <span className="text-cyan-500 font-mono animate-pulse">Computing response...</span>
+                        </div>
+                    ) : answer ? (
+                        <div className="space-y-4">
+                            <div className="bg-slate-800/50 p-3 rounded-lg rounded-tl-none border border-white/5 text-slate-300">
+                                {query}
+                            </div>
+                            <div className="bg-cyan-900/10 p-3 rounded-lg border-l-2 border-cyan-500 text-slate-400 font-mono text-xs leading-relaxed">
+                                <span className="text-cyan-400 font-bold mb-1 block">[AI]:</span>
+                                {answer}
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="bg-slate-800/50 p-3 rounded-lg rounded-tl-none border border-white/5 text-slate-300">
+                                How does the event horizon work?
+                            </div>
+                            <div className="bg-cyan-900/10 p-3 rounded-lg border-l-2 border-cyan-500 text-slate-400 font-mono text-xs">
+                                [Brain]: The event horizon is the boundary defining the region of space around a black hole from which nothing (not even light) can escape.
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 {/* Input Area */}
