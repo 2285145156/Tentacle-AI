@@ -34,7 +34,7 @@ export function KnowledgePanel() {
                             placeholder="Ask follow-up..."
                             className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500/50"
                         />
-                        <button className="absolute right-2 top-1.5 text-cyan-500 hover:text-cyan-400">
+                        <button className="absolute right-2 top-1/2 -translate-y-1/2 text-cyan-500 hover:text-cyan-400">
                             <Send size={16} />
                         </button>
                     </div>

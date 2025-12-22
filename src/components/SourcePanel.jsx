@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Globe, Book, Youtube, FileText, CheckCircle2, Circle, Folder, File, Podcast, AlignLeft } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export function SourcePanel() {
-    const groups = [
+    const [groups, setGroups] = useState([
         {
             title: 'Web Search',
             icon: Globe,
@@ -22,9 +22,20 @@ export function SourcePanel() {
                 { id: 'yt', label: 'YouTube', checked: true },
                 { id: 'pod', label: 'Podcasts', checked: false },
             ]
-        },
+        }
+    ]);
 
-    ];
+    const toggleItem = (groupIndex, itemId) => {
+        setGroups(prevGroups => {
+            const newGroups = [...prevGroups];
+            const group = { ...newGroups[groupIndex] };
+            group.items = group.items.map(item =>
+                item.id === itemId ? { ...item, checked: !item.checked } : item
+            );
+            newGroups[groupIndex] = group;
+            return newGroups;
+        });
+    };
 
     return (
         <div className="glass-panel rounded-none border-x-0 border-t-0 border-b-0 md:rounded-2xl md:border flex flex-col h-full col-span-1 overflow-hidden relative">
@@ -34,7 +45,7 @@ export function SourcePanel() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                {groups.map((group) => (
+                {groups.map((group, groupIndex) => (
                     <div key={group.title} className="space-y-3">
                         <div className="flex items-center gap-2 text-slate-300">
                             <group.icon size={16} className={group.color} />
@@ -42,11 +53,15 @@ export function SourcePanel() {
                         </div>
                         <div className="pl-2 space-y-2 border-l border-white/5 ml-2">
                             {group.items.map(item => (
-                                <div key={item.id} className="group flex items-center gap-3 pl-4 cursor-pointer hover:bg-white/5 py-1.5 rounded-r-lg transition-colors">
+                                <div
+                                    key={item.id}
+                                    onClick={() => toggleItem(groupIndex, item.id)}
+                                    className="group flex items-center gap-3 pl-4 cursor-pointer hover:bg-white/5 py-1.5 rounded-r-lg transition-colors"
+                                >
                                     <div className={cn("w-4 h-4 border rounded flex items-center justify-center transition-colors", item.checked ? "bg-cyan-500/20 border-cyan-500 text-cyan-500" : "border-slate-600 text-transparent")}>
                                         <CheckCircle2 size={12} className={item.checked ? "opacity-100" : "opacity-0"} />
                                     </div>
-                                    <span className={cn("text-sm", item.checked ? "text-cyan-100" : "text-slate-500 group-hover:text-slate-400")}>{item.label}</span>
+                                    <span className={cn("text-sm transition-colors", item.checked ? "text-cyan-100" : "text-slate-500 group-hover:text-slate-400")}>{item.label}</span>
                                 </div>
                             ))}
                         </div>
