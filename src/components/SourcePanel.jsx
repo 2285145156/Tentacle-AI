@@ -54,11 +54,7 @@ export function SourcePanel() {
                 ))}
             </div>
 
-            {/* Footer Status */}
-            <div className="h-12 border-t border-white/10 bg-slate-950 flex items-center px-4 justify-between text-xs font-mono text-slate-500">
-                <span>Status: 4 arms active...</span>
-                <span className="text-cyan-500">[|||||||||| 85%]</span>
-            </div>
+
         </div>
     );
 }

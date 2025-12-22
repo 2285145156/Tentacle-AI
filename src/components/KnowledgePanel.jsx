@@ -1,13 +1,8 @@
 import React from 'react';
-import { Send, FileDown, BookOpen, FileJson, Share2 } from 'lucide-react';
+import { Send } from 'lucide-react';
 
 export function KnowledgePanel() {
-    const exports = [
-        { label: 'PDF', icon: FileDown, color: 'bg-red-500/20 text-red-400' },
-        { label: 'Notion', icon: BookOpen, color: 'bg-stone-500/20 text-stone-300' },
-        { label: 'MD', icon: FileJson, color: 'bg-blue-500/20 text-blue-400' },
-        { label: 'Anki', icon: Share2, color: 'bg-pink-500/20 text-pink-400' },
-    ];
+
 
     return (
         <div className="glass-panel rounded-none border-x-0 border-t-0 border-b-0 md:rounded-2xl md:border flex flex-col h-full col-span-1 overflow-hidden">
@@ -46,26 +41,9 @@ export function KnowledgePanel() {
                 </div>
             </div>
 
-            {/* Quick Export */}
-            <div className="h-auto p-4 border-t border-white/10 bg-slate-900/20">
-                <h3 className="text-xs font-medium text-slate-500 mb-3 uppercase tracking-wider">Quick Export</h3>
-                <div className="grid grid-cols-2 gap-2">
-                    {exports.map((item) => (
-                        <button
-                            key={item.label}
-                            className={`flex flex-col items-center justify-center gap-2 rounded-xl transition-all hover:bg-slate-800 ${item.color} border border-transparent hover:border-white/10`}
-                        >
-                            <item.icon size={14} />
-                            <span className="text-xs font-medium">{item.label}</span>
-                        </button>
-                    ))}
-                </div>
-            </div>
 
-            {/* User Footer */}
-            <div className="h-12 border-t border-white/10 bg-slate-950 flex items-center px-4 justify-end text-xs font-mono text-slate-500">
-                <span>User: Student_01</span>
-            </div>
+
+
         </div>
     );
 }
