@@ -1,38 +1,54 @@
 
-export const generateInsights = async (query, searchResults) => {
+export const generateConceptMap = async (query, searchResults) => {
     const apiKey = '7e010d05d6904046a63664776185b561.Uf8Eoq68707K94pw';
     const url = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
 
     // Construct a context string from search results
     const context = searchResults.map(r => `- ${r.title}: ${r.content}`).join('\n');
 
-    const prompt = `
-    You are Tentacle AI, an advanced learning assistant.
-    User Query: "${query}"
-    Search Context:
-    ${context}
+    const systemPrompt = `你是 Tentacle AI 的核心大脑。你的任务是将搜索结果转化为一个复杂的神经连接概念图。
 
-    Tasks:
-    1. Summarize 3 Key Insights (max 50 words each).
-    2. Provide a concise, conversational answer for the "Knowledge Ink" panel.
+**输入：** 用户的课题 + 联网搜索到的原始文本
+**输出要求：** 必须仅输出一个标准的 JSON 对象，包含 nodes（节点）、edges（连线）和 answer（回答）。
 
-    Output specifically in this JSON format:
-    {
-        "key_insights": ["Insight 1", "Insight 2", "Insight 3"],
-        "answer": "Conversational answer here..."
-    }
-    `;
+**JSON 格式规范：**
+{
+  "nodes": [
+    {"id": "1", "label": "核心课题", "size": 24, "color": "#22d3ee"},
+    {"id": "2", "label": "子概念1", "size": 18, "color": "#6366f1"},
+    {"id": "3", "label": "子概念2", "size": 16, "color": "#8b5cf6"}
+  ],
+  "edges": [
+    {"source": "1", "target": "2", "label": "关联"},
+    {"source": "1", "target": "3", "label": "包含"}
+  ],
+  "answer": "简洁的对话式回答，不超过150字..."
+}
+
+**节点规范：**
+- 控制在 5-8 个节点
+- 核心概念 size=24，颜色 #22d3ee (青色)
+- 次级概念 size=16-20，颜色 #6366f1 (靛蓝) 或 #8b5cf6 (紫色)
+- 警告/重要节点可用 #ef4444 (红色)
+
+**约束：** 不要包含任何解释性文字，只输出 JSON。`;
+
+    const userPrompt = `用户课题: "${query}"
+
+搜索资料:
+${context}
+
+请分析以上资料，生成概念图 JSON。`;
 
     const body = {
-        model: "glm-4.6",
+        model: "glm-4-flash",
         messages: [
-            { role: "system", content: "You are a helpful AI assistant that outputs JSON." },
-            { role: "user", content: prompt }
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
         ],
         temperature: 0.7,
         top_p: 0.9,
-        max_tokens: 1024,
-        json: true // Assuming the API supports JSON mode or we parse text
+        max_tokens: 1024
     };
 
     try {
@@ -59,9 +75,15 @@ export const generateInsights = async (query, searchResults) => {
             parsed = JSON.parse(cleanContent);
         } catch (e) {
             console.error("Failed to parse JSON from Zhipu:", e);
-            // Fallback if not JSON
+            // Fallback with default concept map
             parsed = {
-                key_insights: ["Analysis complete.", "Data complex.", "Review sources."],
+                nodes: [
+                    { id: "1", label: query, size: 24, color: "#22d3ee" },
+                    { id: "2", label: "相关概念", size: 16, color: "#6366f1" }
+                ],
+                edges: [
+                    { source: "1", target: "2", label: "关联" }
+                ],
                 answer: content
             };
         }
@@ -73,3 +95,4 @@ export const generateInsights = async (query, searchResults) => {
         return null;
     }
 };
+

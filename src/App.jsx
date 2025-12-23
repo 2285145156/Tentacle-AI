@@ -5,12 +5,12 @@ import { SourcePanel } from './components/SourcePanel';
 import { CentralBrain } from './components/CentralBrain';
 import { KnowledgePanel } from './components/KnowledgePanel';
 import { searchTavily } from './lib/tavily';
-import { generateInsights } from './lib/zhipu';
+import { generateConceptMap } from './lib/zhipu';
 
 function App() {
   const [searchResults, setSearchResults] = useState(null);
   const [aiAnswer, setAiAnswer] = useState(null);
-  const [keyInsights, setKeyInsights] = useState(null);
+  const [conceptMap, setConceptMap] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [currentQuery, setCurrentQuery] = useState("");
 
@@ -21,7 +21,7 @@ function App() {
     setCurrentQuery(query);
     setSearchResults(null);
     setAiAnswer(null);
-    setKeyInsights(null);
+    setConceptMap(null);
 
     // 1. Search Tavily
     const searchData = await searchTavily(query);
@@ -29,11 +29,11 @@ function App() {
     if (searchData && searchData.results) {
       setSearchResults(searchData.results);
 
-      // 2. Process with Zhipu AI
-      const zhipuData = await generateInsights(query, searchData.results);
+      // 2. Process with Zhipu AI - Generate Concept Map
+      const zhipuData = await generateConceptMap(query, searchData.results);
 
       if (zhipuData) {
-        setKeyInsights(zhipuData.key_insights);
+        setConceptMap({ nodes: zhipuData.nodes, edges: zhipuData.edges });
         setAiAnswer(zhipuData.answer);
       } else {
         // Fallback to Tavily answer if Zhipu fails
@@ -52,7 +52,7 @@ function App() {
         <Header onSearch={handleSearch} isSearching={isSearching} />
         <main className="flex-1 grid grid-cols-5 gap-6 p-6 h-full overflow-hidden">
           <SourcePanel sources={searchResults} isSearching={isSearching} />
-          <CentralBrain insights={keyInsights} isSearching={isSearching} />
+          <CentralBrain conceptMap={conceptMap} isSearching={isSearching} />
           <KnowledgePanel answer={aiAnswer} isSearching={isSearching} query={currentQuery} />
         </main>
       </Layout>
@@ -61,3 +61,4 @@ function App() {
 }
 
 export default App;
+

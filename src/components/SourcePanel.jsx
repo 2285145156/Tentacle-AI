@@ -3,35 +3,50 @@ import { Globe, Book, Youtube, FileText, CheckCircle2, Circle, Folder, File, Pod
 import { cn } from '../lib/utils';
 
 export function SourcePanel({ sources, isSearching }) {
-    // Default mock data when no search results
-    const defaultWebSources = [
+    // State for toggleable sources
+    const [webSources, setWebSources] = useState([
         { id: 'wiki', label: 'Wikipedia', checked: true },
         { id: 'arxiv', label: 'ArXiv Papers', checked: true },
         { id: 'reddit', label: 'Reddit', checked: false },
-    ];
+    ]);
 
-    // Multimedia remains static for now
-    const multimediaSources = [
+    const [multimediaSources, setMultimediaSources] = useState([
         { id: 'yt', label: 'YouTube', checked: true },
         { id: 'pod', label: 'Podcasts', checked: false },
-    ];
+    ]);
 
-    const webItems = sources
-        ? sources.map((s, i) => ({ id: s.url, label: s.title, checked: true, url: s.url }))
-        : defaultWebSources;
+    // Toggle web source selection
+    const toggleWebSource = (id) => {
+        setWebSources(prev =>
+            prev.map(item =>
+                item.id === id ? { ...item, checked: !item.checked } : item
+            )
+        );
+    };
+
+    // Toggle multimedia source selection
+    const toggleMultimediaSource = (id) => {
+        setMultimediaSources(prev =>
+            prev.map(item =>
+                item.id === id ? { ...item, checked: !item.checked } : item
+            )
+        );
+    };
 
     const groups = [
         {
             title: 'Web Search',
             icon: Globe,
             color: 'text-cyan-400',
-            items: webItems
+            items: webSources,
+            onToggle: toggleWebSource
         },
         {
             title: 'Multimedia',
             icon: Youtube,
             color: 'text-red-500',
-            items: multimediaSources
+            items: multimediaSources,
+            onToggle: toggleMultimediaSource
         }
     ];
 
@@ -42,39 +57,42 @@ export function SourcePanel({ sources, isSearching }) {
                 <h2 className="text-sm font-semibold tracking-wider text-slate-400 uppercase">Source Tentacles</h2>
             </div>
 
+            {/* Always show sources - no loading spinner */}
             <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                {isSearching ? (
-                    <div className="flex flex-col items-center justify-center h-40 space-y-4">
-                        <div className="w-8 h-8 rounded-full border-2 border-cyan-500 border-t-transparent animate-spin"></div>
-                        <p className="text-cyan-500 text-sm animate-pulse">Scanning the cosmos...</p>
-                    </div>
-                ) : (
-                    groups.map((group) => (
-                        <div key={group.title} className="space-y-3">
-                            <div className="flex items-center gap-2 text-slate-300">
-                                <group.icon size={16} className={group.color} />
-                                <span className="text-sm font-medium">{group.title}</span>
-                            </div>
-                            <div className="pl-2 space-y-2 border-l border-white/5 ml-2">
-                                {group.items.map(item => (
-                                    <div
-                                        key={item.id}
-                                        onClick={() => item.url ? window.open(item.url, '_blank') : null}
-                                        className={cn("group flex items-center gap-3 pl-4 py-1.5 rounded-r-lg transition-colors", item.url ? "cursor-pointer hover:bg-white/5" : "cursor-default")}
-                                    >
-                                        <div className={cn("w-4 h-4 border rounded flex items-center justify-center transition-colors", item.checked ? "bg-cyan-500/20 border-cyan-500 text-cyan-500" : "border-slate-600 text-transparent")}>
-                                            <CheckCircle2 size={12} className={item.checked ? "opacity-100" : "opacity-0"} />
-                                        </div>
-                                        <span className={cn("text-sm transition-colors truncate pr-2", item.checked ? "text-cyan-100" : "text-slate-500")}>
-                                            {item.label}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
+                {groups.map((group) => (
+                    <div key={group.title} className="space-y-3">
+                        <div className="flex items-center gap-2 text-slate-300">
+                            <group.icon size={16} className={group.color} />
+                            <span className="text-sm font-medium">{group.title}</span>
                         </div>
-                    ))
-                )}
+                        <div className="pl-2 space-y-2 border-l border-white/5 ml-2">
+                            {group.items.map(item => (
+                                <div
+                                    key={item.id}
+                                    onClick={() => group.onToggle(item.id)}
+                                    className="group flex items-center gap-3 pl-4 py-1.5 rounded-r-lg transition-colors cursor-pointer hover:bg-white/5"
+                                >
+                                    <div className={cn(
+                                        "w-4 h-4 border rounded flex items-center justify-center transition-colors",
+                                        item.checked
+                                            ? "bg-cyan-500/20 border-cyan-500 text-cyan-500"
+                                            : "border-slate-600 text-transparent hover:border-slate-400"
+                                    )}>
+                                        <CheckCircle2 size={12} className={item.checked ? "opacity-100" : "opacity-0"} />
+                                    </div>
+                                    <span className={cn(
+                                        "text-sm transition-colors truncate pr-2",
+                                        item.checked ? "text-cyan-100" : "text-slate-500"
+                                    )}>
+                                        {item.label}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
 }
+
