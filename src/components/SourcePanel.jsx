@@ -270,10 +270,9 @@ export function SourcePanel({ onConfigChange }) {
                         style={{ width: `${(getActiveArms() / 8) * 100}%` }}
                     />
                 </div>
-                <div className="mt-2 text-[10px] text-slate-600 text-center font-mono">
-                    {searchDepth === 'advanced' ? '⚡ DEEP SCAN MODE' : '🔍 QUICK SCAN MODE'}
-                </div>
             </div>
         </div>
     );
 }
+
+

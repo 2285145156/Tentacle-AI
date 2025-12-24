@@ -59,12 +59,11 @@ export function Header({ onSearch, isSearching }) {
                 </div>
             </div>
 
-            {/* Right Controls (Placeholder) */}
+            {/* Right Controls (Empty) */}
             <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center">
-                    <span className="text-xs font-medium text-slate-400">USR</span>
-                </div>
+                {/* User avatar removed */}
             </div>
         </header>
+
     );
 }
