@@ -38,7 +38,7 @@ export function Header({ onSearch, isSearching }) {
                         <input
                             ref={inputRef}
                             type="text"
-                            defaultValue="How do Black Holes work?"
+                            placeholder="Search the cosmos..."
                             className="w-full bg-transparent border-none focus:ring-0 focus:outline-none appearance-none text-slate-200 placeholder-slate-500 px-4 py-3 font-medium shadow-none outline-none ring-0 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden"
                             style={{
                                 boxShadow: 'none',

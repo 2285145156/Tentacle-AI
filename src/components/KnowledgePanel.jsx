@@ -33,14 +33,11 @@ export function KnowledgePanel({ answer, isSearching, query }) {
                             </div>
                         </div>
                     ) : (
-                        <>
-                            <div className="bg-slate-800/50 p-3 rounded-lg rounded-tl-none border border-white/5 text-slate-300">
-                                How does the event horizon work?
+                        <div className="flex flex-col items-center justify-center h-full text-center space-y-3 py-8">
+                            <div className="text-slate-500 text-sm">
+                                Search to begin AI analysis
                             </div>
-                            <div className="bg-cyan-900/10 p-3 rounded-lg border-l-2 border-cyan-500 text-slate-400 font-mono text-xs">
-                                [Brain]: The event horizon is the boundary defining the region of space around a black hole from which nothing (not even light) can escape.
-                            </div>
-                        </>
+                        </div>
                     )}
                 </div>
 

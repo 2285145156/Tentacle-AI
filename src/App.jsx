@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
 import { SourcePanel } from './components/SourcePanel';
@@ -14,6 +14,18 @@ function App() {
   const [isSearching, setIsSearching] = useState(false);
   const [currentQuery, setCurrentQuery] = useState("");
 
+  // Store search config from SourcePanel
+  const searchConfigRef = useRef({
+    searchDepth: 'basic',
+    searchTopic: 'general',
+    includeImages: false,
+    includeAnswer: true
+  });
+
+  const handleConfigChange = (config) => {
+    searchConfigRef.current = config;
+  };
+
   const handleSearch = async (query) => {
     if (!query.trim()) return;
 
@@ -23,18 +35,26 @@ function App() {
     setAiAnswer(null);
     setConceptMap(null);
 
-    // 1. Search Tavily
-    const searchData = await searchTavily(query);
+    const config = searchConfigRef.current;
+
+    // 1. Search Tavily with user configuration
+    const searchData = await searchTavily(query, config);
 
     if (searchData && searchData.results) {
       setSearchResults(searchData.results);
 
       // 2. Process with Zhipu AI - Generate Concept Map
-      const zhipuData = await generateConceptMap(query, searchData.results);
+      // Pass search depth to Zhipu for complexity matching
+      const zhipuData = await generateConceptMap(query, searchData.results, config.searchDepth);
 
       if (zhipuData) {
         setConceptMap({ nodes: zhipuData.nodes, edges: zhipuData.edges });
-        setAiAnswer(zhipuData.answer);
+        // Prefer Tavily's answer if available and includeAnswer is true
+        if (config.includeAnswer && searchData.answer) {
+          setAiAnswer(searchData.answer);
+        } else {
+          setAiAnswer(zhipuData.answer);
+        }
       } else {
         // Fallback to Tavily answer if Zhipu fails
         setAiAnswer(searchData.answer || "Analysis failed.");
@@ -51,7 +71,7 @@ function App() {
       <Layout>
         <Header onSearch={handleSearch} isSearching={isSearching} />
         <main className="flex-1 grid grid-cols-5 gap-6 p-6 h-full overflow-hidden">
-          <SourcePanel sources={searchResults} isSearching={isSearching} />
+          <SourcePanel onConfigChange={handleConfigChange} />
           <CentralBrain conceptMap={conceptMap} isSearching={isSearching} />
           <KnowledgePanel answer={aiAnswer} isSearching={isSearching} query={currentQuery} />
         </main>
@@ -61,4 +81,5 @@ function App() {
 }
 
 export default App;
+
 
