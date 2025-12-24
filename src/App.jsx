@@ -44,8 +44,8 @@ function App() {
       setSearchResults(searchData.results);
 
       // 2. Process with Zhipu AI - Generate Concept Map
-      // Pass search depth to Zhipu for complexity matching
-      const zhipuData = await generateConceptMap(query, searchData.results, config.searchDepth);
+      // Pass search depth and topic to Zhipu for intelligent matching
+      const zhipuData = await generateConceptMap(query, searchData.results, config.searchDepth, config.searchTopic);
 
       if (zhipuData) {
         setConceptMap({ nodes: zhipuData.nodes, edges: zhipuData.edges });

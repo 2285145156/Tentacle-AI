@@ -33,7 +33,7 @@ export function ConceptGraph({ data }) {
             .map(node => ({
                 id: String(node.id),
                 label: String(node.label || 'Node'),
-                size: Number(node.size) || 16,
+                val: Number(node.val) || 10,
                 color: String(node.color || '#6366f1')
             }));
 
@@ -54,13 +54,17 @@ export function ConceptGraph({ data }) {
     // Center the graph after initial render
     useEffect(() => {
         if (graphRef.current && graphData.nodes.length > 0) {
+            // Apply stronger repulsion and longer links
+            graphRef.current.d3Force('charge').strength(-300);
+            graphRef.current.d3Force('link').distance(100);
+
             const timer = setTimeout(() => {
                 try {
-                    graphRef.current.zoomToFit(400, 60);
+                    graphRef.current.zoomToFit(600, 80);
                 } catch (e) {
                     console.warn('Failed to zoom:', e);
                 }
-            }, 800);
+            }, 1000);
             return () => clearTimeout(timer);
         }
     }, [graphData]);
@@ -70,18 +74,17 @@ export function ConceptGraph({ data }) {
         if (!node || node.x === undefined || node.y === undefined) return;
 
         const label = node.label || '';
-        const nodeSize = node.size || 16;
-        const fontSize = Math.max(10, nodeSize / 2);
+        const nodeSize = (node.val || 10) / 1.5;
         const color = node.color || '#6366f1';
 
         try {
             // Draw glow effect
-            const gradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, nodeSize * 1.5);
-            gradient.addColorStop(0, color + '40');
+            const gradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, nodeSize * 2);
+            gradient.addColorStop(0, color + '30');
             gradient.addColorStop(1, 'transparent');
             ctx.fillStyle = gradient;
             ctx.beginPath();
-            ctx.arc(node.x, node.y, nodeSize * 1.5, 0, 2 * Math.PI);
+            ctx.arc(node.x, node.y, nodeSize * 2, 0, 2 * Math.PI);
             ctx.fill();
 
             // Draw main node circle
@@ -92,20 +95,25 @@ export function ConceptGraph({ data }) {
 
             // Draw border
             ctx.strokeStyle = color;
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.arc(node.x, node.y, nodeSize / 2 + 2, 0, 2 * Math.PI);
             ctx.stroke();
 
-            // Draw label
-            ctx.font = `${fontSize}px Inter, sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#e2e8f0';
-            ctx.shadowColor = '#000';
-            ctx.shadowBlur = 4;
-            ctx.fillText(label, node.x, node.y + nodeSize / 2 + fontSize + 4);
-            ctx.shadowBlur = 0;
+            // Draw label only if zoomed in enough or it is a large node
+            const fontSize = 12 / globalScale;
+            const shouldShowLabel = globalScale > 1.2 || node.val >= 25;
+
+            if (shouldShowLabel) {
+                ctx.font = `${fontSize}px Inter, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#e2e8f0';
+                ctx.shadowColor = '#000';
+                ctx.shadowBlur = 4;
+                ctx.fillText(label, node.x, node.y + nodeSize / 2 + fontSize + 4);
+                ctx.shadowBlur = 0;
+            }
         } catch (e) {
             console.warn('Node render error:', e);
         }
@@ -122,24 +130,19 @@ export function ConceptGraph({ data }) {
             end.x === undefined || end.y === undefined) return;
 
         try {
-            // Draw gradient line
-            const gradient = ctx.createLinearGradient(start.x, start.y, end.x, end.y);
-            gradient.addColorStop(0, '#22d3ee80');
-            gradient.addColorStop(0.5, '#6366f180');
-            gradient.addColorStop(1, '#22d3ee80');
-
-            ctx.strokeStyle = gradient;
-            ctx.lineWidth = 2;
+            // Draw simple semi-transparent line
+            ctx.strokeStyle = '#6366f140';
+            ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(start.x, start.y);
             ctx.lineTo(end.x, end.y);
             ctx.stroke();
 
-            // Draw edge label if exists
-            if (link.label) {
+            // Draw edge label only if zoomed in
+            if (link.label && ctx.globalAlpha > 0.5) {
                 const midX = (start.x + end.x) / 2;
                 const midY = (start.y + end.y) / 2;
-                ctx.font = '9px Inter, sans-serif';
+                ctx.font = '8px Inter, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#94a3b8';
@@ -175,18 +178,18 @@ export function ConceptGraph({ data }) {
                     if (!node || node.x === undefined || node.y === undefined) return;
                     ctx.fillStyle = color;
                     ctx.beginPath();
-                    ctx.arc(node.x, node.y, node.size || 16, 0, 2 * Math.PI);
+                    ctx.arc(node.x, node.y, (node.val || 10) / 2, 0, 2 * Math.PI);
                     ctx.fill();
                 }}
                 linkCanvasObject={linkCanvasObject}
-                linkDirectionalParticles={2}
+                linkDirectionalParticles={1}
                 linkDirectionalParticleSpeed={0.005}
                 linkDirectionalParticleColor={() => '#22d3ee'}
-                linkDirectionalParticleWidth={3}
-                d3AlphaDecay={0.02}
+                linkDirectionalParticleWidth={2}
+                d3AlphaDecay={0.01}
                 d3VelocityDecay={0.3}
-                warmupTicks={50}
-                cooldownTicks={100}
+                warmupTicks={100}
+                cooldownTicks={200}
                 enableNodeDrag={true}
                 enableZoomInteraction={true}
                 enablePanInteraction={true}

@@ -16,9 +16,13 @@ export const searchTavily = async (query, config = {}) => {
     const {
         searchDepth = 'basic',
         searchTopic = 'general',
+        maxResults = 8,
         includeImages = false,
         includeAnswer = true
     } = config;
+
+    // Tavily only supports 'general' and 'news' as topics
+    const validTopic = searchTopic === 'research' ? 'general' : searchTopic;
 
     const body = {
         api_key: apiKey,
@@ -26,8 +30,8 @@ export const searchTavily = async (query, config = {}) => {
         search_depth: searchDepth,
         include_answer: includeAnswer,
         include_images: includeImages,
-        max_results: searchDepth === 'advanced' ? 8 : 5,
-        topic: searchTopic
+        max_results: Math.min(maxResults, 10), // Tavily free tier/dev keys often limit max_results
+        topic: validTopic
     };
 
     try {

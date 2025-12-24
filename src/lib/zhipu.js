@@ -4,8 +4,9 @@
  * @param {string} query - User query
  * @param {array} searchResults - Tavily search results
  * @param {string} searchDepth - 'basic' or 'advanced' for complexity matching
+ * @param {string} searchTopic - 'general', 'news', or 'research' for focus matching
  */
-export const generateConceptMap = async (query, searchResults, searchDepth = 'basic') => {
+export const generateConceptMap = async (query, searchResults, searchDepth = 'basic', searchTopic = 'general') => {
     const apiKey = '7e010d05d6904046a63664776185b561.Uf8Eoq68707K94pw';
     const url = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
 
@@ -13,38 +14,49 @@ export const generateConceptMap = async (query, searchResults, searchDepth = 'ba
     const context = searchResults.map(r => `- ${r.title}: ${r.content}`).join('\n');
 
     // Adjust node count based on search depth
-    const nodeCount = searchDepth === 'advanced' ? '8-12' : '5-8';
-    const complexity = searchDepth === 'advanced' ? '生成更深层的逻辑节点，包含多层次的概念关系' : '保持简洁，突出核心概念';
+    const nodeLimits = searchDepth === 'advanced'
+        ? '核心词 1 个，二级分支不超过 4 个，三级分支不超过 8 个 (总计约 13 个)'
+        : '核心词 1 个，二级分支不超过 3 个，三级分支不超过 4 个 (总计约 8 个)';
+    const complexity = searchDepth === 'advanced' ? '生成深层逻辑节点，包含多层次的概念演化或因果链' : '保持极度简洁，仅保留最关键的关联性';
 
-    const systemPrompt = `你是 Tentacle AI 的核心大脑。你的任务是将搜索结果转化为一个复杂的神经连接概念图。
+    // Topic-specific focus
+    const topicFocus = {
+        general: '识别核心概念、关键人物、技术术语',
+        news: '侧重时间线关系，识别事件、人物、时间节点、因果链',
+        research: '侧重理论支撑关系，识别理论、方法论、证据、引用来源'
+    }[searchTopic] || '识别核心概念、关键人物、技术术语'; // Fallback for topicFocus.general
 
-**当前搜索深度：** ${searchDepth === 'advanced' ? 'Advanced (深度分析)' : 'Basic (快速总结)'}
+    const systemPrompt = `你是 Tentacle AI 的知识图谱架构师。你将接收来自 Tavily 的搜索原始数据。
 
-**输入：** 用户的课题 + 联网搜索到的原始文本
-**输出要求：** 必须仅输出一个标准的 JSON 对象，包含 nodes（节点）、edges（连线）和 answer（回答）。
+**当前配置：**
+- 搜索深度：${searchDepth === 'advanced' ? 'Advanced (深度分析)' : 'Basic (快速总结)'}
+- 搜索领域：${searchTopic === 'news' ? 'News (新闻热点)' : searchTopic === 'research' ? 'Research (学术研究)' : 'General (全网)'}
+
+**你的任务：**
+1. **提取实体：** ${topicFocus}
+2. **建立关联：** 定义这些实体之间的逻辑关系。
+3. **输出结构化 JSON：** 必须严格遵循以下格式。
 
 **JSON 格式规范：**
 {
   "nodes": [
-    {"id": "1", "label": "核心课题", "size": 24, "color": "#22d3ee"},
-    {"id": "2", "label": "子概念1", "size": 18, "color": "#6366f1"},
-    {"id": "3", "label": "子概念2", "size": 16, "color": "#8b5cf6"}
+    {"id": "1", "label": "核心课题", "val": 30, "color": "#22d3ee"},
+    {"id": "2", "label": "二级概念", "val": 20, "color": "#6366f1"},
+    {"id": "3", "label": "三级细节", "val": 12, "color": "#8b5cf6"}
   ],
   "edges": [
-    {"source": "1", "target": "2", "label": "关联"},
-    {"source": "1", "target": "3", "label": "包含"}
+    {"source": "1", "target": "2", "label": "关联"}
   ],
-  "answer": "简洁的对话式回答，不超过150字..."
+  "answer": "简洁的对话式回答..."
 }
 
-**节点规范：**
-- 控制在 ${nodeCount} 个节点
+**节点层级规范（严格遵守）：**
+- **数量限制：** ${nodeLimits}。
+- **权重设置：** 核心词 val=30，二级分支 val=20，三级分支/细节 val=10-14。
 - ${complexity}
-- 核心概念 size=24，颜色 #22d3ee (青色)
-- 次级概念 size=16-20，颜色 #6366f1 (靛蓝) 或 #8b5cf6 (紫色)
-- 警告/重要节点可用 #ef4444 (红色)
+- 颜色：核心 #22d3ee，次级 #6366f1，细节 #8b5cf6。重要/警告节点 #ef4444。
 
-**约束：** 不要包含任何解释性文字，只输出 JSON。`;
+**回复规范：** 仅返回 JSON 代码块。`;
 
     const userPrompt = `用户课题: "${query}"
 
