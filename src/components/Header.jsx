@@ -21,13 +21,16 @@ export function Header({ onSearch, isSearching }) {
         <header className="h-20 px-6 flex items-center justify-between border-b border-white/5 bg-slate-950/50 backdrop-blur-sm z-50">
             {/* Logo Area */}
             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                    <Zap className="text-white w-6 h-6" fill="currentColor" />
-                </div>
+                <img
+                    src="/1.png"
+                    alt="Tentacle Logo"
+                    className="w-14 h-14 object-contain drop-shadow-[0_0_10px_rgba(34,211,238,0.3)]"
+                />
                 <span className="text-xl font-bold tracking-tight text-white">
                     Tentacle <span className="text-cyan-400">AI</span>
                 </span>
             </div>
+
 
             {/* Central Search */}
             <div className="flex-1 max-w-2xl mx-12">
