@@ -41,10 +41,15 @@ export function SourcePanel({ onConfigChange }) {
         }
     }, [searchDepth, searchTopic, tentacleReach, includeImages, includeAnswer, onConfigChange]);
 
-    // Calculate active "arms" based on tentacle reach
+    // Calculate active "arms" based on all settings
     const getActiveArms = () => {
-        // Map tentacleReach (5-20) to arms (3-8)
-        return Math.min(8, Math.max(3, Math.floor(tentacleReach / 3) + 1));
+        let count = Math.floor(tentacleReach / 5) + 1; // 5->2, 10->3, 15->4, 20->5
+        if (searchDepth === 'advanced') count += 1;
+        if (searchTopic === 'research') count += 1;
+        if (includeImages && includeAnswer) count += 1;
+        else if (includeImages || includeAnswer) count += 0.5;
+
+        return Math.min(8, Math.ceil(count));
     };
 
     return (
@@ -109,10 +114,10 @@ export function SourcePanel({ onConfigChange }) {
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                         {[
-                            { id: 'general', label: 'General', icon: Globe, desc: '全网' },
-                            { id: 'news', label: 'News', icon: Newspaper, desc: '实时' },
-                            { id: 'research', label: 'Research', icon: GraduationCap, desc: '学术' },
-                        ].map(({ id, label, icon: Icon, desc }) => (
+                            { id: 'general', label: 'General', icon: Globe },
+                            { id: 'news', label: 'News', icon: Newspaper },
+                            { id: 'research', label: 'Research', icon: GraduationCap },
+                        ].map(({ id, label, icon: Icon }) => (
                             <button
                                 key={id}
                                 onClick={() => setSearchTopic(id)}
@@ -127,6 +132,7 @@ export function SourcePanel({ onConfigChange }) {
                                 <span className="text-[10px] font-medium">{label}</span>
                             </button>
                         ))}
+
                     </div>
                 </div>
 
